@@ -1,0 +1,200 @@
+﻿@model iep.Models.AuctionViewModel
+@using PagedList.Mvc;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+@{
+    ViewBag.Title = "SearchAuctions";
+    Layout = "../Shared/_Layout.cshtml";
+}
+
+
+
+
+@using (Html.BeginForm("SearchAuctions", "Manage"))
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>Filter search:</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.HighPrice, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.HighPrice, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.HighPrice, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.LowPrice, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.LowPrice, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.LowPrice, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Status, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Filter Search" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<hr>
+@{
+    if (Model.AuctionList.Count == 0)
+    {
+        <h3>Sorry. We could not find any auctions.  </h3>
+    }
+    if (ViewBag.message != null)
+    {
+        <h2>ViewBag.message</h2>
+    }
+}
+<hr>
+
+<div class="row">
+    @foreach (var item in Model.AuctionList)
+    {
+        if (item.IMG != null)
+        {
+            string konvertovano = Convert.ToBase64String(item.IMG);
+            string IMGSrc = string.Format("data:image/png;base64,{0}", konvertovano);
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <a href="#"><img class="card-img-top" src="@IMGSrc" alt="Image not found" height="250" width="250"></a>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="/Manage/Details/@item.Id">@item.Name-see more details</a>
+                        </h4>
+                        <p class="card-text" id="fullname @item.Id">@item.FullName</p>
+                        <p class="card-text" id="currprice @item.Id">@item.CurrentPrice</p>
+                        <p class="card-text" id="status @item.Id">State: @item.Status</p>
+                        @if (item.Status == "OPENED")
+                        {
+                            <p class="card-text" id="timer @item.Id"></p>
+                        }
+                    </div>
+                    @using (Html.BeginForm("Bid", "Account", FormMethod.Post, new { id = "form " + item.Id }))
+                    {
+                        @Html.AntiForgeryToken()
+                        if (item.Status == "OPENED" && Session["User"] != null)
+                        {
+                            <input type="number" name="tokensNum" value="@(item.CurrentPrice + 1)" min="@(item.CurrentPrice + 1)" id="tokensNum @item.Id" class="form-control" />
+                            <input type="hidden" name="idAuction" value="@item.Id" id="auctionId @item.Id" />
+                            <input type="hidden" name="curAuction" value="@item.Currency" id="auctiionCur @item.Id" />
+
+                            <button class="btn btn-primary" type="submit" id="bidButton @item.Id" onclick="">Bid</button>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@if (Model.AuctionList.PageSize == 0)
+{
+    <h3> No auctions found! </h3>
+}
+Page @(Model.AuctionList.PageCount < Model.AuctionList.PageNumber ? 0 : Model.AuctionList.PageNumber) of @Model.AuctionList.PageCount
+@Html.PagedListPager(Model.AuctionList, page => Url.Action("SearchAuctions", new iep.Models.AuctionViewModel
+{
+    Name = Model.Name,
+    LowPrice = Model.LowPrice,
+    HighPrice = Model.HighPrice,
+    Status = Model.Status,
+    Page = page
+}))
+
+@section scripts {
+    <script>
+        $.connection.hub.start();
+
+        $.connection.auctionHub.client.AuctionUpdate = function (idAuction, tokensNum, fullName) {
+            document.getElementById("fullname " + idAuction).innerHTML = fullName;
+            document.getElementById("currprice " + idAuction).innerHTML = tokensNum;
+            var defaultTokenNum = document.getElementById("form " + idAuction).elements["tokensNum " + idAuction];
+            defaultTokenNum.value = "" + (tokensNum + 1);
+            defaultTokenNum.min = "" + (tokensNum + 1);
+        }
+        $.connection.auctionHub.client.CloseAuction = function (auctionID) {
+            document.getElementById("state " + auctionID).innerHTML = "COMPLETED";
+            document.getElementById("timer " + auctionID).innerHTML = "ENDED";
+            document.getElementById("bidButton " + auctionID).className += " disabled";
+            document.getElementById("bidButton " + auctionID).disabled = true;
+        }
+
+        function timer(time, id) {
+            var x = setInterval(function () {
+                var localTime = new Date();
+                var now = new Date(localTime.getUTCFullYear(), localTime.getUTCMonth(), localTime.getUTCDate(),
+                    localTime.getUTCHours(), localTime.getUTCMinutes(), localTime.getUTCSeconds(), localTime.getUTCMilliseconds());
+                var distance = time.getTime() - now.getTime();
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById("timer " + id).innerHTML = days + "d " + hours + "h "
+                    + minutes + "m " + seconds + "s ";
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById("timer " + id).innerHTML = "";
+                    document.getElementById("status " + id).innerHTML = "State: COMPLETED"
+                    @if (Session["User"] != null) {
+                        <text>
+                            document.getElementById("bidButton " + id).className += " disabled";
+                            document.getElementById("bidButton " + id).disabled = true;
+                        </text>
+                    }
+                    $.connection.auctionHub.server.closeAuction(id);
+                    
+                }
+            }, 1000);
+        }
+
+        @foreach(var item in Model.AuctionList)
+        {
+            if (item.Status == "OPENED")
+            {
+                <text>
+                    var year = @(((DateTime)item.OpenedOn).AddSeconds(item.AuctionTime).Year);
+                    var month =@(((DateTime)item.OpenedOn).AddSeconds(item.AuctionTime).Month);
+                    var day = @(((DateTime)item.OpenedOn).AddSeconds(item.AuctionTime).Day);
+                    var hour = @(((DateTime)item.OpenedOn).AddSeconds(item.AuctionTime).Hour);
+                    var minute = @(((DateTime)item.OpenedOn).AddSeconds(item.AuctionTime).Minute);
+                    var second = @(((DateTime)item.OpenedOn).AddSeconds(item.AuctionTime).Second);
+                    var time = new Date(year,month-1,day,hour,minute,second,0);
+                    timer(time,@item.Id);
+                </text>
+            }
+        }
+
+    </script>
+}
+
+
+
+
+
+
+
+

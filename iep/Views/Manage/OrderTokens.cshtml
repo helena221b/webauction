@@ -1,0 +1,42 @@
+﻿@model iep.Models.TokenOder
+
+@{
+    ViewBag.Title = "OrderTokens";
+    Layout = "../Shared/_Layout.cshtml";
+}
+
+<h2>OrderTokens</h2>
+
+@using (Html.BeginForm("OrderT", "Manage", FormMethod.Post)) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>Order Tokens:</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+       
+
+        <div class="form-group">
+            @Html.AntiForgeryToken()
+            <select name="package">
+                <option>SilverPackage</option>
+                <option>GoldPackage</option>
+                <option>PlatinumPackage</option>
+            </select>
+            <br />
+            <br />
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="ORDER" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

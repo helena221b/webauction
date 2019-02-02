@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+
+</head>
+<body>
+   @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/Scripts/jquery.signalR-2.4.0.min.js")
+    @Scripts.Render("~/Scripts/jquery.signalR-2.4.0.js")
+    @Scripts.Render("~/SignalR/hubs")
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Web Auctions", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    @if (Session["User"] != null && Session["Admin"] == null)
+                    {
+                        <li>@Html.ActionLink("Manage Account", "Manage", "Account")</li>
+                        <li>@Html.ActionLink("Change Password", "ChangePassword", "Account")</li>
+                        <li>@Html.ActionLink("Create An Auction", "CreateAuction", "Manage")</li>
+                        <li>@Html.ActionLink("Won Auctions", "WonAuctions", "Manage")</li>
+                        <li>@Html.ActionLink("Search Auctions", "SearchAuctions", "Manage")</li>
+                        <li>@Html.ActionLink("Buy Tokens", "OrderTokens", "Manage")</li>
+                        <li>@Html.ActionLink("My Token Orders", "AllTokenOrders", "Account")</li>
+                    }
+
+                    @if (Session["Admin"] != null)
+                    {
+                        <li>@Html.ActionLink("Change System Parameters", "ChangeParameters", "Account")</li>
+                        <li>@Html.ActionLink("Ready Auctions", "ReadyAuctions", "Manage")</li>
+                    }
+
+                    @if (Session["User"] == null && Session["Admin"] == null)
+                    {
+                        
+                        <li>@Html.ActionLink("Search Auctions", "SearchAuctions", "Manage")</li>
+                 
+                    }
+                </ul>
+
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+
+

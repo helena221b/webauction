@@ -1,0 +1,21 @@
+﻿@using Microsoft.AspNet.Identity
+@if (Session["User"] != null || Session["AdminUser"]!=null)
+{
+
+
+     <ul class="nav navbar-nav navbar-right">
+         <li>
+             @Html.ActionLink("Hello " + Session["Name"] + "!", "Index", "Account")
+         </li>
+         <li><a href="/Account/Logout">Log off</a></li>
+     </ul>
+
+
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li>@Html.ActionLink("Register", "Register", "Account")</li>
+        <li>@Html.ActionLink("Log in", "Login", "Account")</li>
+    </ul>
+}

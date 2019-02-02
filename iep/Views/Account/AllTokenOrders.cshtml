@@ -1,0 +1,54 @@
+﻿@model IEnumerable<iep.Models.TokenOder>
+
+@{
+    ViewBag.Title = "AllTokenOrders";
+    Layout = "../Shared/_Layout.cshtml";
+}
+
+<h2>AllTokenOrders</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Buyer)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TokensAmount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Currency)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Buyer)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TokensAmount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Price)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Currency)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Status)
+        </td>
+     
+    </tr>
+}
+
+</table>

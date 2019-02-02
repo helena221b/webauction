@@ -1,0 +1,38 @@
+﻿@model IEnumerable<iep.Models.Auction>
+
+@{
+    ViewBag.Title = "WonAuctions";
+    Layout = "../Shared/_Layout.cshtml";
+}
+
+<h2>WonAuctions</h2>
+
+    @{if (ViewBag.Message != null)
+        {
+            <p>@ViewBag.Message</p>
+        }
+     }
+<div class="row">
+    @foreach (var item in Model)
+    {
+        if (item.IMG != null)
+        {
+            string konvertovano = Convert.ToBase64String(item.IMG);
+            string IMGSrc = string.Format("data:image/png;base64,{0}", konvertovano);
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <a href="#"><img class="card-img-top" src="@IMGSrc" alt="Image not found" height="250" width="250"></a>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="/Manage/Details/@item.Id">@item.Name-see more details</a>
+                        </h4>
+                        <p class="card-text" id="fullname @item.Id">@item.FullName</p>
+                        <p class="card-text" id="status @item.Id">State: @item.Status</p>
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+</div>
